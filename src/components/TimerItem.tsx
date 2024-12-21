@@ -24,7 +24,6 @@ export const TimerItem: React.FC<TimerItemProps> = ({ timer }) => {
     if (timer.isRunning) {
       intervalRef.current = window.setInterval(() => {
         updateTimer(timer.id);
-        
         if (timer.remainingTime <= 1 && !hasEndedRef.current) {
           hasEndedRef.current = true;
           timerAudio.play().catch(console.error);
@@ -39,9 +38,17 @@ export const TimerItem: React.FC<TimerItemProps> = ({ timer }) => {
           });
         }
       }, 1000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     }
 
-    return () => clearInterval(intervalRef.current!);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [timer.isRunning, timer.id, timer.remainingTime, timer.title, timerAudio, updateTimer]);
 
   const handleRestart = () => {

@@ -224,7 +224,7 @@ export const TimerModal: React.FC<TimerModalProps> = ({
             </Button>
             <Button
               type='submit'
-              variant={isTitleValid && isTimeValid ? 'primary' : 'disabled'}
+              variant='primary'
             >
               {timer ? 'Save Changes' : 'Add Timer'}
             </Button>
