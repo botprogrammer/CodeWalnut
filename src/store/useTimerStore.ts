@@ -2,8 +2,25 @@ import { configureStore, createSlice } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
 import { Timer } from '../types/timer';
 
+const loadInitialData = (): Timer[] => {
+  try {
+    const timers = localStorage.getItem('timers');
+    return timers ? JSON.parse(timers) : [];
+  } catch {
+    return [];
+  }
+};
+
+const updateTimars = (timers: Timer[]) => {
+  try {
+    localStorage.setItem('timers', JSON.stringify(timers));
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const initialState = {
-  timers: [] as Timer[],
+  timers: loadInitialData(),
 };
 
 const timerSlice = createSlice({
@@ -11,19 +28,23 @@ const timerSlice = createSlice({
   initialState,
   reducers: {
     addTimer: (state, action) => {
-      state.timers.push({
+      const newTimer = {
         ...action.payload,
         id: crypto.randomUUID(),
         createdAt: Date.now(),
-      });
+      };
+      state.timers.push(newTimer);
+      updateTimars(state.timers);
     },
     deleteTimer: (state, action) => {
       state.timers = state.timers.filter(timer => timer.id !== action.payload);
+      updateTimars(state.timers);
     },
     toggleTimer: (state, action) => {
       const timer = state.timers.find(timer => timer.id === action.payload);
       if (timer) {
         timer.isRunning = !timer.isRunning;
+        updateTimars(state.timers);
       }
     },
     updateTimer: (state, action) => {
@@ -31,6 +52,7 @@ const timerSlice = createSlice({
       if (timer && timer.isRunning) {
         timer.remainingTime -= 1;
         timer.isRunning = timer.remainingTime > 0;
+        updateTimars(state.timers);
       }
     },
     restartTimer: (state, action) => {
@@ -38,6 +60,7 @@ const timerSlice = createSlice({
       if (timer) {
         timer.remainingTime = timer.duration;
         timer.isRunning = false;
+        updateTimars(state.timers);
       }
     },
     editTimer: (state, action) => {
@@ -46,6 +69,7 @@ const timerSlice = createSlice({
         Object.assign(timer, action.payload.updates);
         timer.remainingTime = action.payload.updates.duration || timer.duration;
         timer.isRunning = false;
+        updateTimars(state.timers);
       }
     },
   },
